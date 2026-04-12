@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGCC - Panel Principal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Bienvenido, <span id="nombreUsuario"></span></h2>
+            <span id="rolBadge" class="badge"></span>
+            <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
+        </div>
+        
+        <div class="dashboard-menu">
+            <div class="card" onclick="irANuevaCadena()">
+                <div class="icon">📄</div>
+                <h3>Nueva Cadena</h3>
+                <p>Crear cadena de custodia</p>
+            </div>
+            
+            <div class="card" onclick="irAEscaner()">
+                <div class="icon">📷</div>
+                <h3>Escáner QR</h3>
+                <p>Verificar cadena por ID</p>
+            </div>
+            
+            <div class="card" onclick="irAMisCadenas()">
+                <div class="icon">📋</div>
+                <h3>Mis Cadenas</h3>
+                <p>Ver historial y estado</p>
+            </div>
+            
+            <div id="adminPanel" style="display:none;">
+                <div class="card" onclick="irARegistrarUsuario()">
+                    <div class="icon">👤+</div>
+                    <h3>Registrar Funcionario</h3>
+                    <p>Solo para Jefe/Admin</p>
+                </div>
+                
+                <div class="card" onclick="irAAuditoria()">
+                    <div class="icon">📜</div>
+                    <h3>Auditoría</h3>
+                    <p>Ver registro de actividad</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status">
+            <span id="onlineStatus">📡 Conectado</span>
+            <button onclick="sincronizar()" class="sync-btn">🔄 Sincronizar</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

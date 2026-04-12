@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGCC - Mis Cadenas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>📋 Mis Cadenas de Custodia</h2>
+        <button onclick="volver()" class="back-btn">← Volver</button>
+        
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Descripción</th><th>Delegación</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr>
+            </thead>
+            <tbody id="listaCadenas">
+                <tr><td colspan="6">Cargando...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', cargarMisCadenas);
+    </script>
+</body>
+</html>

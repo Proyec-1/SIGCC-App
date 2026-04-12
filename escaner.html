@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGCC - Verificar Cadena</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>📷 Verificar Cadena de Custodia</h2>
+        <button onclick="volver()" class="back-btn">← Volver</button>
+        
+        <div class="info">
+            <p>Para verificar una cadena, ingrese su número de ID:</p>
+        </div>
+        
+        <input type="number" id="buscarId" placeholder="Número de ID de la cadena">
+        <button onclick="verificarCadenaPorId()">Verificar</button>
+        
+        <div id="resultado" style="margin-top:20px;"></div>
+        
+        <div class="info" style="margin-top:20px;">
+            <strong>Nota:</strong> El código QR se genera automáticamente al crear la cadena.
+            Para escanear con cámara real, la aplicación debe estar en HTTPS o localhost.
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

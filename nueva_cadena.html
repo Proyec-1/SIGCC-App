@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGCC - Nueva Cadena</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>📄 Nueva Cadena de Custodia</h2>
+        <button onclick="volver()" class="back-btn">← Volver</button>
+        
+        <label>Descripción de la evidencia *:</label>
+        <textarea id="descripcion" rows="3"></textarea>
+        
+        <label>Lugar de hallazgo *:</label>
+        <input type="text" id="lugar">
+        
+        <label>Fecha y hora *:</label>
+        <input type="datetime-local" id="fechaHora">
+        
+        <label>Delegación / Ubicación actual *:</label>
+        <select id="delegacion">
+            <option value="CICPC San Carlos">CICPC San Carlos</option>
+            <option value="CICPC Tinaquillo">CICPC Tinaquillo</option>
+            <option value="TSJ Cojedes">TSJ Cojedes</option>
+            <option value="Ministerio Público San Carlos">Ministerio Público San Carlos</option>
+            <option value="UNES San Carlos">UNES San Carlos</option>
+        </select>
+        
+        <label>Observaciones:</label>
+        <textarea id="observaciones" rows="2"></textarea>
+        
+        <button onclick="guardarCadena()">Guardar Cadena</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

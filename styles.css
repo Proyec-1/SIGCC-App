@@ -1,0 +1,216 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0a1f1a 0%, #0d2818 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo h1 {
+    color: #1a472a;
+    font-size: 2.2em;
+}
+
+.logo p {
+    color: #555;
+    font-size: 12px;
+}
+
+h2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #1a472a;
+    outline: none;
+}
+
+button {
+    background: #1a472a;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background: #0d2818;
+    transform: scale(1.02);
+}
+
+.card {
+    background: #f8f9fa;
+    padding: 18px;
+    margin: 12px 0;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.card:hover {
+    background: #e8f5e9;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.card .icon {
+    font-size: 35px;
+}
+
+.badge {
+    background: #ff9800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: inline-block;
+    color: white;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+}
+
+.back-btn, .logout-btn {
+    background: #666;
+    width: auto;
+    padding: 8px 15px;
+    margin: 0;
+}
+
+.sync-btn {
+    background: #2196F3;
+    width: auto;
+    padding: 8px 15px;
+}
+
+.status {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    font-size: 13px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #1a472a;
+    color: white;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.success {
+    color: green;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.info {
+    background: #e3f2fd;
+    padding: 12px;
+    border-radius: 12px;
+    margin-top: 15px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.qr-reader {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+#video {
+    width: 100%;
+    border-radius: 15px;
+    background: #000;
+}
+
+.estado-abierta {
+    background: #ff9800;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: inline-block;
+}
+
+.estado-cerrada {
+    background: #4caf50;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: inline-block;
+}
+
+.estado-derivada {
+    background: #2196F3;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: inline-block;
+}

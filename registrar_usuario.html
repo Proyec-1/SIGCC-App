@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGCC - Registrar Funcionario</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>👤 Registrar Nuevo Funcionario</h2>
+        <button onclick="volver()" class="back-btn">← Volver</button>
+        
+        <label>Cédula *:</label>
+        <input type="text" id="reg_cedula" placeholder="V12345678">
+        
+        <label>Nombre completo *:</label>
+        <input type="text" id="reg_nombre">
+        
+        <label>Teléfono:</label>
+        <input type="text" id="reg_telefono" placeholder="0412-1234567">
+        
+        <label>Institución:</label>
+        <select id="reg_institucion">
+            <option value="UNES">UNES</option>
+            <option value="CICPC">CICPC</option>
+            <option value="TSJ">TSJ</option>
+            <option value="Ministerio Público">Ministerio Público</option>
+        </select>
+        
+        <label>Cargo:</label>
+        <input type="text" id="reg_cargo" placeholder="Detective, Inspector...">
+        
+        <label>Jerarquía:</label>
+        <input type="text" id="reg_jerarquia" placeholder="Jefe, Agente...">
+        
+        <label>Rol:</label>
+        <select id="reg_rol">
+            <option value="funcionario">Funcionario de campo</option>
+            <option value="admin">Administrador</option>
+        </select>
+        
+        <label>Contraseña *:</label>
+        <input type="password" id="reg_password">
+        
+        <button onclick="registrarFuncionario()">Registrar Funcionario</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

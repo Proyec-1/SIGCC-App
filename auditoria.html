@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGCC - Auditoría</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>📜 Registro de Auditoría</h2>
+        <button onclick="volver()" class="back-btn">← Volver</button>
+        
+        <div class="info">
+            <p>Registro de todas las acciones realizadas en el sistema</p>
+        </div>
+        
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr><th>Fecha/Hora</th><th>Usuario</th><th>Nombre</th><th>Acción</th><th>Detalles</th></tr>
+                </thead>
+                <tbody id="listaAuditoria">
+                    <tr><td colspan="5">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', cargarAuditoria);
+    </script>
+</body>
+</html>

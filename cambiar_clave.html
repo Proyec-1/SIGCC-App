@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGCC - Cambiar Clave</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>🔐 Cambiar Clave Única</h2>
+        <button onclick="volver()" class="back-btn">← Volver</button>
+        
+        <div style="text-align:center; padding:20px;">
+            <div class="info">
+                <p>Para cambiar la clave única, autentíquese con reconocimiento facial.</p>
+            </div>
+            
+            <button onclick="simularRostro()" style="background:#2196F3;">Verificar Rostro</button>
+            
+            <div id="cambioPanel" style="display:none; margin-top:20px;">
+                <label>Nueva Clave Única:</label>
+                <input type="text" id="nuevaClave">
+                <button onclick="guardarClave()">Guardar</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        let db;
+        
+        function initDB() {
+            const request = indexedDB.open('SIGCC_DB', 2);
+            request.onsuccess = () => { db = request.result; };
+        }
+        initDB();
+        
+        window.simularRostro = function() {
+            document.getElementById('cambioPanel').style.display = 'block';
+            alert('✅ Rostro verificado correctamente');
+        };
+        
+        window.guardarClave = function() {
+            const nuevaClave = document.getElementById('nuevaClave').value;
+            if (!nuevaClave) { alert('Ingrese una clave'); return; }
+            
+            const transaction = db.transaction(['config'], 'readwrite');
+            const store = transaction.objectStore('config');
+            store.put({ key: 'clave_unica', value: nuevaClave });
+            
+            alert('✅ Clave única actualizada');
+            window.location.href = 'dashboard.html';
+        };
+        
+        window.volver = function() { window.location.href = 'dashboard.html'; };
+    </script>
+</body>
+</html>
