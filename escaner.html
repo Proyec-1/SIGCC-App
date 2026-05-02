@@ -3,28 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGCC - Verificar Cadena</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>SIGCC - Escáner</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);padding:20px;}
+        .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
+        input{width:100%;padding:12px;margin:10px 0;border:2px solid #ddd;border-radius:12px;}
+        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;width:100%;}
+        .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;}
+        .resultado{background:#e8f5e9;padding:15px;border-radius:12px;margin-top:15px;}
+    </style>
 </head>
 <body>
     <div class="container">
-        <h2>📷 Verificar Cadena de Custodia</h2>
-        <button onclick="volver()" class="back-btn">← Volver</button>
-        
-        <div class="info">
-            <p>Para verificar una cadena, ingrese su número de ID:</p>
-        </div>
-        
+        <h2>📷 Verificar Cadena</h2>
+        <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
+
         <input type="number" id="buscarId" placeholder="Número de ID de la cadena">
-        <button onclick="verificarCadenaPorId()">Verificar</button>
-        
-        <div id="resultado" style="margin-top:20px;"></div>
-        
-        <div class="info" style="margin-top:20px;">
-            <strong>Nota:</strong> El código QR se genera automáticamente al crear la cadena.
-            Para escanear con cámara real, la aplicación debe estar en HTTPS o localhost.
-        </div>
+        <button onclick="verificar()">Verificar</button>
+        <div id="resultado"></div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        function verificar() {
+            const id = parseInt(document.getElementById('buscarId').value);
+            if (!id) return alert('Ingrese un ID');
+            
+            const request = indexedDB.open('SIGCC_DB', 1);
+            request.onsuccess = (e) => {
+                const db = e.target.result;
+                const tx = db.transaction(['cadenas'], 'readonly');
+                const store = tx.objectStore('cadenas');
+                const get = store.get(id);
+                
+                get.onsuccess = () => {
+                    const c = get.result;
+                    const div = document.getElementById('resultado');
+                    if (c) {
+                        div.innerHTML = `<div class="resultado">
+                            <h3>✅ CADENA VÁLIDA</h3>
+                            <p><strong>ID:</strong> ${c.id}</p>
+                            <p><strong>Descripción:</strong> ${c.descripcion}</p>
+                            <p><strong>Lugar:</strong> ${c.lugar}</p>
+                            <p><strong>Delegación:</strong> ${c.delegacion}</p>
+                            <p><strong>Fecha:</strong> ${c.fecha}</p>
+                            <p><strong>Creado por:</strong> ${c.creadorNombre}</p>
+                        </div>`;
+                    } else {
+                        div.innerHTML = `<div class="resultado" style="background:#ffebee;">❌ Cadena #${id} no encontrada</div>`;
+                    }
+                };
+            };
+        }
+    </script>
 </body>
 </html>
