@@ -3,70 +3,542 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SIGCC CICPC</title>
-    
-    <!-- Configuración para APP INDEPENDIENTE -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="logo.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SIGCC CICPC">
-    <meta name="theme-color" content="#0a4c8c">
-    <meta name="mobile-web-app-capable" content="yes">
-    
+    <title>SIGCC - Sistema de Cadena de Custodia</title>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
-        .container{max-width:500px;margin:0 auto;background:white;border-radius:25px;padding:30px;box-shadow:0 20px 40px rgba(0,0,0,0.3);}
-        .logo{text-align:center;margin-bottom:25px;}
-        .logo-img{width:80px;height:80px;margin:0 auto 10px;display:block;}
-        .logo h1{color:#0a4c8c;font-size:2.2em;}
-        .logo p{color:#666;font-size:12px;}
-        .cicpc-footer{font-size:11px;color:#0a4c8c;text-align:center;margin-top:10px;font-weight:bold;}
-        input{width:100%;padding:12px;margin:10px 0;border:2px solid #ddd;border-radius:12px;font-size:16px;}
-        input:focus{border-color:#0a4c8c;outline:none;}
-        button{width:100%;padding:12px;background:#0a4c8c;color:white;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:16px;}
-        button:hover{background:#073a6b;}
-        .error{color:red;text-align:center;margin-top:10px;}
-        h2{margin-bottom:15px;color:#0a4c8c;}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #0f3460;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 { font-size: 1.5rem; }
+        .header p { font-size: 0.8rem; opacity: 0.9; }
+
+        .content { padding: 20px; }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .menu-card {
+            background: #f0f0f0;
+            padding: 20px 10px;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #ddd;
+        }
+
+        .menu-card:hover { background: #e0e0e0; transform: scale(0.98); }
+        .menu-card .emoji { font-size: 2rem; }
+
+        .btn {
+            background: #0f3460;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-secondary { background: #533483; }
+        .btn-danger { background: #e94560; }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            font-family: inherit;
+        }
+
+        label { font-weight: bold; font-size: 0.9rem; }
+
+        .qr-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 15px;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 10px;
+            display: inline-block;
+        }
+
+        .back-btn {
+            background: #533483;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .hidden { display: none; }
+
+        .card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid #0f3460;
+        }
+
+        .camera-view {
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        #reader { width: 100%; }
+
+        table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #0f3460;
+            color: white;
+            padding: 8px;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        hr { margin: 20px 0; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="logo_cicpc.svg" alt="CICPC" class="logo-img" onerror="this.style.display='none'">
-            <h1>SIGCC</h1>
-            <p>Sistema de Gestión de Cadena de Custodia</p>
-            <div class="cicpc-footer">🔹 CICPC - División de Criminalística 🔹</div>
-        </div>
-        <div class="login-box">
-            <h2>Acceso Autorizado</h2>
-            <input type="text" id="cedula" placeholder="Cédula (Ej: V32136846)">
-            <input type="password" id="password" placeholder="Contraseña">
-            <button id="btnLogin">Ingresar al Sistema</button>
-            <div id="errorMsg" class="error"></div>
-        </div>
-    </div>
+    <div id="app"></div>
+
     <script>
-        // USUARIO ÚNICO: José Moreno
-        const USUARIO_VALIDO = {
-            cedula: 'V32136846',
-            password: 'Cadete2-2025',
-            nombre: 'José Moreno',
-            jerarquia: 'Comisario General Superior Nacional'
-        };
-        
-        document.getElementById('btnLogin').addEventListener('click', function() {
-            const cedula = document.getElementById('cedula').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (cedula === USUARIO_VALIDO.cedula && password === USUARIO_VALIDO.password) {
-                localStorage.setItem('usuarioActual', JSON.stringify(USUARIO_VALIDO));
-                window.location.href = 'dashboard.html';
+        // ========== DATOS GLOBALES ==========
+        let currentUser = null;
+        let cadenas = JSON.parse(localStorage.getItem('cadenas')) || [];
+        let funcionarios = JSON.parse(localStorage.getItem('funcionarios')) || [];
+        let html5QrCode = null;
+
+        // Funcionarios por defecto
+        if(funcionarios.length === 0){
+            funcionarios = [
+                { id: 1, nombre: "Inspector Pérez", cedula: "V12345678", cargo: "Inspector", delegacion: "San Carlos" },
+                { id: 2, nombre: "Detective López", cedula: "V87654321", cargo: "Detective", delegacion: "San Carlos" }
+            ];
+            localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+        }
+
+        // ========== RENDERIZADO PRINCIPAL ==========
+        function render() {
+            if(!currentUser){
+                renderLogin();
             } else {
-                document.getElementById('errorMsg').innerHTML = '❌ Credenciales incorrectas. Acceso denegado.';
+                renderMenu();
             }
-        });
+        }
+
+        function renderLogin() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <div class="header">
+                        <h1>SIGCC</h1>
+                        <p>Sistema de Gestión de Cadena de Custodia</p>
+                        <p>CICPC - División de Criminalística</p>
+                    </div>
+                    <div class="content">
+                        <label>Cédula (Ej: V32136846)</label>
+                        <input type="text" id="cedulaInput" placeholder="V12345678">
+                        <label>Contraseña</label>
+                        <input type="password" id="passwordInput" placeholder="contraseña">
+                        <button class="btn" onclick="login()">Ingresar al Sistema</button>
+                        <div style="text-align:center; margin-top:15px; font-size:0.8rem; color:#888;">Demo: cualquier cédula y contraseña "1234"</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMenu() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <div class="header">
+                        <h1>SIGCC</h1>
+                        <p>Bienvenido, ${currentUser.cedula}</p>
+                        <button class="back-btn" style="background:#e94560; margin-top:10px;" onclick="logout()">Cerrar Sesión</button>
+                    </div>
+                    <div class="content">
+                        <div class="menu-grid">
+                            <div class="menu-card" onclick="showNuevaCadena()">
+                                <div class="emoji">➕</div>
+                                <div>Nueva Cadena</div>
+                            </div>
+                            <div class="menu-card" onclick="showVerificarCadena()">
+                                <div class="emoji">📷</div>
+                                <div>Verificar Cadena</div>
+                            </div>
+                            <div class="menu-card" onclick="showMisCadenas()">
+                                <div class="emoji">📋</div>
+                                <div>Mis Cadenas</div>
+                            </div>
+                            <div class="menu-card" onclick="showAuditoria()">
+                                <div class="emoji">🔍</div>
+                                <div>Auditoría</div>
+                            </div>
+                            <div class="menu-card" onclick="showFuncionarios()">
+                                <div class="emoji">👮</div>
+                                <div>Funcionarios</div>
+                            </div>
+                        </div>
+                        <div id="dynamicContent"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ========== FUNCIONES DE AUTENTICACIÓN ==========
+        function login() {
+            const cedula = document.getElementById('cedulaInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            if(!cedula) return alert("Ingrese cédula");
+            if(password !== "1234") return alert("Contraseña incorrecta (demo: 1234)");
+            currentUser = { cedula, nombre: cedula };
+            agregarAuditoria("LOGIN", `Usuario ${cedula} inició sesión`);
+            render();
+        }
+
+        function logout() {
+            currentUser = null;
+            if(html5QrCode) html5QrCode.stop().catch(console.log);
+            render();
+        }
+
+        // ========== NUEVA CADENA CON QR ==========
+        function showNuevaCadena() {
+            const container = document.getElementById('dynamicContent');
+            container.innerHTML = `
+                <button class="back-btn" onclick="backToMain()">← Volver</button>
+                <h3>Nueva Cadena de Custodia</h3>
+                <label>Descripción de la evidencia *:</label>
+                <textarea id="descripcion" rows="2" placeholder="Ej: Teléfono Samsung, arma calibre 9mm..."></textarea>
+                
+                <label>Lugar de hallazgo *:</label>
+                <input type="text" id="lugar" placeholder="Ej: Calle Bolívar, casa #12">
+                
+                <label>Fecha y hora *:</label>
+                <input type="datetime-local" id="fechahora">
+                
+                <label>Delegación *:</label>
+                <input type="text" id="delegacion" value="San Carlos (Cojedes)">
+                
+                <label>Funcionario que recibe:</label>
+                <select id="funcionarioId">
+                    ${funcionarios.map(f => `<option value="${f.id}">${f.nombre} - ${f.cargo}</option>`).join('')}
+                </select>
+                
+                <label>Observaciones:</label>
+                <textarea id="observaciones" rows="2" placeholder="Detalles adicionales..."></textarea>
+                
+                <button class="btn" onclick="guardarCadena()">Guardar Cadena con QR</button>
+            `;
+        }
+
+        function guardarCadena() {
+            const descripcion = document.getElementById('descripcion').value;
+            const lugar = document.getElementById('lugar').value;
+            const fechahora = document.getElementById('fechahora').value;
+            const delegacion = document.getElementById('delegacion').value;
+            const observaciones = document.getElementById('observaciones').value;
+            const funcionarioId = parseInt(document.getElementById('funcionarioId').value);
+
+            if(!descripcion || !lugar || !fechahora){
+                return alert("Complete descripción, lugar y fecha/hora");
+            }
+
+            const id = "CAD-" + Date.now() + "-" + Math.floor(Math.random()*1000);
+            const nuevaCadena = {
+                id: id,
+                descripcion, lugar, fechahora, delegacion, observaciones,
+                funcionarioId,
+                funcionarioNombre: funcionarios.find(f => f.id === funcionarioId)?.nombre || "Desconocido",
+                fechaCreacion: new Date().toISOString(),
+                creadoPor: currentUser.cedula
+            };
+
+            cadenas.push(nuevaCadena);
+            localStorage.setItem('cadenas', JSON.stringify(cadenas));
+            agregarAuditoria("CREAR", `Cadena ${id} creada - ${descripcion.substring(0,30)}`);
+
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(id)}`;
+            const container = document.getElementById('dynamicContent');
+            container.innerHTML = `
+                <button class="back-btn" onclick="showNuevaCadena()">← Nueva Cadena</button>
+                <div class="qr-container">
+                    <h4>✅ Cadena guardada con QR</h4>
+                    <p><strong>ID:</strong> ${id}</p>
+                    <div class="qr-code">
+                        <img src="${qrUrl}" width="200" height="200">
+                    </div>
+                    <p>Escanea este QR para verificar la cadena</p>
+                    <button class="btn" onclick="backToMain()">Volver al inicio</button>
+                </div>
+            `;
+        }
+
+        // ========== VERIFICAR CADENA CON CÁMARA ==========
+        function showVerificarCadena() {
+            const container = document.getElementById('dynamicContent');
+            container.innerHTML = `
+                <button class="back-btn" onclick="backToMain()">← Volver</button>
+                <h3>Verificar Cadena</h3>
+                <label>Escribir ID manual:</label>
+                <input type="text" id="manualId" placeholder="Ej: CAD-1734567890-123">
+                <button class="btn" onclick="verificarPorId()">Verificar por ID</button>
+                
+                <hr>
+                
+                <button class="btn btn-secondary" id="scanQrBtn">📷 Escanear QR con Cámara</button>
+                <div id="qrReaderSection" class="hidden camera-view">
+                    <div id="reader"></div>
+                    <button class="btn" onclick="detenerCamara()">Detener Cámara</button>
+                </div>
+                <div id="resultadoVerificacion"></div>
+            `;
+            
+            document.getElementById('scanQrBtn').addEventListener('click', () => {
+                document.getElementById('qrReaderSection').classList.remove('hidden');
+                iniciarScanner();
+            });
+        }
+
+        function iniciarScanner() {
+            if(html5QrCode) html5QrCode.stop().catch(console.log);
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start({ facingMode: "environment" }, config, 
+                (decodedText) => {
+                    verificarCadenaPorID(decodedText);
+                    detenerCamara();
+                }, 
+                (error) => {}
+            );
+        }
+
+        function detenerCamara() {
+            if(html5QrCode) {
+                html5QrCode.stop().catch(console.log);
+                html5QrCode = null;
+            }
+            document.getElementById('qrReaderSection')?.classList.add('hidden');
+        }
+
+        function verificarPorId() {
+            const id = document.getElementById('manualId').value.trim();
+            if(!id) return alert("Ingrese un ID");
+            verificarCadenaPorID(id);
+        }
+
+        function verificarCadenaPorID(id) {
+            const cadena = cadenas.find(c => c.id === id);
+            const resultDiv = document.getElementById('resultadoVerificacion');
+            if(!cadena){
+                resultDiv.innerHTML = `<div class="card" style="border-left-color:#e94560;"><strong>❌ No encontrada</strong><br>ID: ${id}</div>`;
+                agregarAuditoria("VERIFICAR", `ID ${id} no encontrado`);
+                return;
+            }
+            resultDiv.innerHTML = `
+                <div class="card">
+                    <strong>✅ Cadena Válida</strong><br>
+                    <strong>ID:</strong> ${cadena.id}<br>
+                    <strong>Evidencia:</strong> ${cadena.descripcion}<br>
+                    <strong>Lugar:</strong> ${cadena.lugar}<br>
+                    <strong>Fecha/Hora:</strong> ${cadena.fechahora}<br>
+                    <strong>Delegación:</strong> ${cadena.delegacion}<br>
+                    <strong>Funcionario:</strong> ${cadena.funcionarioNombre}<br>
+                    <strong>Observaciones:</strong> ${cadena.observaciones || "Ninguna"}<br>
+                    <strong>Creada por:</strong> ${cadena.creadoPor}
+                </div>
+            `;
+            agregarAuditoria("VERIFICAR", `Cadena ${id} verificada correctamente`);
+        }
+
+        // ========== MIS CADENAS ==========
+        function showMisCadenas() {
+            const misCadenas = cadenas.filter(c => c.creadoPor === currentUser.cedula);
+            const container = document.getElementById('dynamicContent');
+            container.innerHTML = `
+                <button class="back-btn" onclick="backToMain()">← Volver</button>
+                <h3>Mis Cadenas (${misCadenas.length})</h3>
+                ${misCadenas.map(c => `
+                    <div class="card">
+                        <strong>ID:</strong> ${c.id}<br>
+                        <strong>Evidencia:</strong> ${c.descripcion.substring(0,50)}<br>
+                        <strong>Fecha:</strong> ${c.fechahora}<br>
+                        <button class="btn" style="margin-top:10px;" onclick="verDetalleCadena('${c.id}')">Ver Detalle y QR</button>
+                    </div>
+                `).join('')}
+                ${misCadenas.length === 0 ? '<p>No hay cadenas registradas</p>' : ''}
+            `;
+        }
+
+        function verDetalleCadena(id) {
+            const cadena = cadenas.find(c => c.id === id);
+            if(!cadena) return;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(cadena.id)}`;
+            const container = document.getElementById('dynamicContent');
+            container.innerHTML = `
+                <button class="back-btn" onclick="showMisCadenas()">← Atrás</button>
+                <div class="qr-container">
+                    <h4>Detalle de Cadena</h4>
+                    <p><strong>ID:</strong> ${cadena.id}</p>
+                    <p><strong>Evidencia:</strong> ${cadena.descripcion}</p>
+                    <p><strong>Lugar hallazgo:</strong> ${cadena.lugar}</p>
+                    <p><strong>Fecha/Hora:</strong> ${cadena.fechahora}</p>
+                    <p><strong>Funcionario:</strong> ${cadena.funcionarioNombre}</p>
+                    <div class="qr-code">
+                        <img src="${qrUrl}" width="200">
+                    </div>
+                    <button class="btn" onclick="backToMain()">Volver</button>
+                </div>
+            `;
+        }
+
+        // ========== AUDITORÍA ==========
+        function showAuditoria() {
+            const logs = JSON.parse(localStorage.getItem('auditoria')) || [];
+            const container = document.getElementById('dynamicContent');
+            container.innerHTML = `
+                <button class="back-btn" onclick="backToMain()">← Volver</button>
+                <h3>Auditoría</h3>
+                <table style="width:100%; font-size:12px; border-collapse:collapse;">
+                    <tr style="background:#0f3460; color:white;">
+                        <th style="padding:8px;">Fecha</th>
+                        <th style="padding:8px;">Usuario</th>
+                        <th style="padding:8px;">Acción</th>
+                    </tr>
+                    ${logs.slice().reverse().map(log => `
+                        <tr style="border-bottom:1px solid #ddd;">
+                            <td style="padding:8px;">${new Date(log.fecha).toLocaleString()}</td>
+                            <td style="padding:8px;">${log.usuario}</td>
+                            <td style="padding:8px;">${log.accion}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+        }
+
+        // ========== FUNCIONARIOS ==========
+        function showFuncionarios() {
+            const container = document.getElementById('dynamicContent');
+            container.innerHTML = `
+                <button class="back-btn" onclick="backToMain()">← Volver</button>
+                <h3>Registrar Funcionario</h3>
+                <label>Nombre:</label>
+                <input type="text" id="newNombre">
+                <label>Cédula:</label>
+                <input type="text" id="newCedula">
+                <label>Cargo:</label>
+                <input type="text" id="newCargo" placeholder="Inspector, Detective...">
+                <label>Delegación:</label>
+                <input type="text" id="newDelegacion" placeholder="San Carlos">
+                <button class="btn" onclick="agregarFuncionario()">Guardar Funcionario</button>
+                
+                <h4 style="margin-top:20px;">Lista de Funcionarios</h4>
+                ${funcionarios.map(f => `<div class="card">${f.nombre} - ${f.cargo} (${f.cedula})</div>`).join('')}
+            `;
+        }
+
+        function agregarFuncionario() {
+            const nombre = document.getElementById('newNombre').value.trim();
+            const cedula = document.getElementById('newCedula').value.trim();
+            const cargo = document.getElementById('newCargo').value.trim();
+            const delegacion = document.getElementById('newDelegacion').value.trim();
+            if(!nombre || !cedula) return alert("Complete nombre y cédula");
+            
+            const newId = funcionarios.length + 1;
+            funcionarios.push({ id: newId, nombre, cedula, cargo, delegacion });
+            localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+            agregarAuditoria("FUNCIONARIO", `Agregado: ${nombre} - ${cedula}`);
+            showFuncionarios();
+        }
+
+        // ========== UTILIDADES ==========
+        function agregarAuditoria(accion, detalle) {
+            let logs = JSON.parse(localStorage.getItem('auditoria')) || [];
+            logs.push({
+                fecha: new Date().toISOString(),
+                usuario: currentUser ? currentUser.cedula : "Sistema",
+                accion: `${accion}: ${detalle}`
+            });
+            localStorage.setItem('auditoria', logs);
+        }
+
+        function backToMain() {
+            document.getElementById('dynamicContent').innerHTML = "";
+        }
+
+        // Exponer funciones globalmente
+        window.login = login;
+        window.logout = logout;
+        window.showNuevaCadena = showNuevaCadena;
+        window.showVerificarCadena = showVerificarCadena;
+        window.showMisCadenas = showMisCadenas;
+        window.showAuditoria = showAuditoria;
+        window.showFuncionarios = showFuncionarios;
+        window.guardarCadena = guardarCadena;
+        window.verificarPorId = verificarPorId;
+        window.verDetalleCadena = verDetalleCadena;
+        window.agregarFuncionario = agregarFuncionario;
+        window.detenerCamara = detenerCamara;
+        window.backToMain = backToMain;
+
+        // Iniciar app
+        render();
     </script>
 </body>
 </html>
