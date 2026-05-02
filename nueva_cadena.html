@@ -2,54 +2,63 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>SIGCC - Nueva Cadena</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
         .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
-        input,textarea,select{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:12px;}
-        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;width:100%;margin-top:10px;}
-        .back-btn{background:#666;width:auto;padding:8px 15px;}
-        label{font-weight:bold;margin-top:10px;display:block;}
+        input,textarea,select{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:12px;font-size:16px;}
+        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;width:100%;margin-top:10px;font-size:16px;font-weight:bold;}
+        .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;}
+        label{font-weight:bold;margin-top:10px;display:block;color:#333;}
+        .qr-box{display:none;text-align:center;margin-top:20px;padding:20px;background:#e8f5e9;border-radius:15px;}
+        h2{margin-bottom:15px;color:#0a4c8c;}
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h2>📄 Nueva Cadena de Custodia</h2>
-        <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
+        <button onclick="volver()" class="back-btn">← Volver</button>
 
         <label>Descripción de la evidencia *:</label>
-        <textarea id="descripcion" rows="3"></textarea>
+        <textarea id="descripcion" rows="3" placeholder="Ej: Teléfono celular Samsung Galaxy..."></textarea>
 
         <label>Lugar de hallazgo *:</label>
-        <input type="text" id="lugar">
+        <input type="text" id="lugar" placeholder="Ej: Urbanización Los Mangos, calle 5">
 
         <label>Fecha y hora *:</label>
         <input type="datetime-local" id="fechaHora">
 
-        <label>Delegación:</label>
+        <label>Delegación del CICPC:</label>
         <select id="delegacion">
             <option value="CICPC San Carlos (Cojedes)">San Carlos (Cojedes)</option>
             <option value="CICPC Tinaquillo">Tinaquillo</option>
-            <option value="CICPC Caracas">Caracas - Sede Principal</option>
+            <option value="CICPC Caracas - Sede Principal">Caracas - Sede Principal</option>
+            <option value="CICPC Valencia">Valencia</option>
+            <option value="CICPC Maracay">Maracay</option>
+            <option value="CICPC Barquisimeto">Barquisimeto</option>
+            <option value="CICPC Maturín">Maturín</option>
+            <option value="CICPC Ciudad Bolívar">Ciudad Bolívar</option>
         </select>
 
         <label>Observaciones:</label>
-        <textarea id="observaciones" rows="2"></textarea>
+        <textarea id="observaciones" rows="2" placeholder="Ej: Evidencia embalada en bolsa N° 001..."></textarea>
 
-        <button onclick="guardarCadena()">✅ Guardar Cadena</button>
+        <button onclick="guardarCadena()">✅ Guardar Cadena y Generar QR</button>
 
-        <div id="qrContainer" style="display:none; margin-top:20px; text-align:center; padding:20px; background:#e8f5e9; border-radius:15px;">
-            <h3>✅ QR de la Cadena #<span id="qrId"></span></h3>
+        <div id="qrContainer" class="qr-box">
+            <h3 style="color:#0a4c8c;">✅ CADENA GUARDADA</h3>
             <div id="qrCode"></div>
-            <button onclick="window.location.href='dashboard.html'" class="back-btn">Volver</button>
+            <p><strong>ID de la cadena: <span id="cadenaId"></span></strong></p>
+            <button onclick="volver()" class="back-btn">Volver al Menú</button>
         </div>
     </div>
 
     <script>
         let db;
+        
         function initDB() {
             const request = indexedDB.open('SIGCC_DB', 1);
             request.onsuccess = (e) => { db = e.target.result; };
@@ -65,53 +74,79 @@
         }
         initDB();
         
-        window.guardarCadena = function() {
-            const descripcion = document.getElementById('descripcion').value;
-            const lugar = document.getElementById('lugar').value;
+        function volver() {
+            window.location.href = 'dashboard.html';
+        }
+        
+        function guardarCadena() {
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const lugar = document.getElementById('lugar').value.trim();
             const fechaHora = document.getElementById('fechaHora').value;
             const delegacion = document.getElementById('delegacion').value;
+            const observaciones = document.getElementById('observaciones').value.trim();
             const usuario = JSON.parse(localStorage.getItem('usuarioActual'));
             
             if (!descripcion || !lugar || !fechaHora) {
-                alert('Complete todos los campos');
+                alert('❌ Complete descripción, lugar y fecha');
                 return;
             }
             
-            const cadena = {
-                descripcion, lugar, fecha: fechaHora, delegacion,
+            const nuevaCadena = {
+                descripcion: descripcion,
+                lugar: lugar,
+                fecha: fechaHora,
+                observaciones: observaciones,
+                delegacion: delegacion,
+                estado: 'activa',
                 creador: usuario.cedula,
                 creadorNombre: usuario.nombre,
+                creadorJerarquia: usuario.jerarquia,
                 fechaCreacion: new Date().toISOString()
             };
             
-            const tx = db.transaction(['cadenas'], 'readwrite');
-            const store = tx.objectStore('cadenas');
-            const req = store.add(cadena);
+            const transaction = db.transaction(['cadenas'], 'readwrite');
+            const store = transaction.objectStore('cadenas');
+            const request = store.add(nuevaCadena);
             
-            req.onsuccess = (e) => {
-                const id = e.target.result;
-                document.querySelector('form').style.display = 'none';
+            request.onsuccess = (event) => {
+                const id = event.target.result;
+                
+                // Ocultar formulario y mostrar QR
+                document.querySelectorAll('label, input, textarea, select, .back-btn').forEach(el => {
+                    if (el !== document.querySelector('.back-btn')) el.style.display = 'none';
+                });
+                document.querySelector('button[onclick="guardarCadena()"]').style.display = 'none';
                 document.getElementById('qrContainer').style.display = 'block';
-                document.getElementById('qrId').innerHTML = id;
+                document.getElementById('cadenaId').innerHTML = id;
+                
+                // Generar QR
                 new QRCode(document.getElementById('qrCode'), {
-                    text: JSON.stringify({ id: id }),
+                    text: JSON.stringify({ id: id, cicpc: 'SIGCC' }),
                     width: 200,
                     height: 200
                 });
                 
-                // Auditoría
+                // Guardar en auditoría
                 const tx2 = db.transaction(['auditoria'], 'readwrite');
                 const store2 = tx2.objectStore('auditoria');
                 store2.add({
                     fecha: new Date().toISOString(),
                     usuario: usuario.cedula,
+                    usuarioNombre: usuario.nombre,
                     accion: 'CREAR CADENA',
-                    detalles: `Cadena ${id} creada`
+                    detalles: `Cadena #${id} creada en ${delegacion}`
                 });
                 
-                alert('✅ Cadena #' + id + ' guardada');
+                alert('✅ Cadena de Custodia #' + id + ' guardada exitosamente');
             };
-        };
+            
+            request.onerror = () => {
+                alert('❌ Error al guardar la cadena');
+            };
+        }
+        
+        window.volver = volver;
+        window.guardarCadena = guardarCadena;
     </script>
 </body>
 </html>
