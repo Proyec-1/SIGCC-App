@@ -2,31 +2,40 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>SIGCC - Auditoría</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);padding:20px;}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
         .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
         table{width:100%;border-collapse:collapse;margin-top:15px;}
         th,td{padding:10px;text-align:left;border-bottom:1px solid #ddd;}
         th{background:#0a4c8c;color:white;}
-        .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;}
+        .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;border:none;border-radius:12px;color:white;cursor:pointer;}
+        h2{margin-bottom:15px;color:#0a4c8c;}
+        .info{background:#e3f2fd;padding:10px;border-radius:12px;margin-bottom:15px;font-size:12px;text-align:center;}
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📜 Auditoría</h2>
+        <h2>📜 Registro de Auditoría</h2>
         <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
+        <div class="info">🔍 Todas las acciones realizadas en el sistema</div>
         
-        <div style="overflow-x:auto;">
+        <div style="overflow-x:auto; max-height:400px; overflow-y:auto;">
             <table>
-                <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalles</th></tr></thead>
+                <thead><tr><th>Fecha/Hora</th><th>Usuario</th><th>Nombre</th><th>Acción</th><th>Detalles</th></tr></thead>
                 <tbody id="lista"></tbody>
             </table>
         </div>
+        <div style="margin-top:15px; text-align:center; font-size:12px; color:#666;">
+            Total de registros: <span id="total">0</span>
+        </div>
     </div>
     <script>
+        const usuario = JSON.parse(localStorage.getItem('usuarioActual'));
+        if (!usuario) window.location.href = 'index.html';
+        
         const request = indexedDB.open('SIGCC_DB', 1);
         request.onsuccess = (e) => {
             const db = e.target.result;
@@ -35,22 +44,27 @@
             const getAll = store.getAll();
             
             getAll.onsuccess = () => {
-                const registros = getAll.result.reverse();
+                const registros = getAll.result;
                 const tbody = document.getElementById('lista');
+                const totalSpan = document.getElementById('total');
                 tbody.innerHTML = '';
                 
                 if (registros.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4">No hay registros de auditoría</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5">📭 No hay registros de auditoría aún. Crea una cadena primero.</td></tr>';
+                    totalSpan.innerText = '0';
                     return;
                 }
                 
-                registros.forEach(r => {
+                registros.reverse().forEach(r => {
                     const row = tbody.insertRow();
                     row.insertCell(0).innerHTML = new Date(r.fecha).toLocaleString();
                     row.insertCell(1).innerHTML = r.usuario;
-                    row.insertCell(2).innerHTML = r.accion;
-                    row.insertCell(3).innerHTML = r.detalles || '';
+                    row.insertCell(2).innerHTML = r.usuarioNombre || r.usuario;
+                    row.insertCell(3).innerHTML = r.accion || 'acción';
+                    row.insertCell(4).innerHTML = (r.detalles || '').substring(0, 50);
                 });
+                
+                totalSpan.innerText = registros.length;
             };
         };
     </script>
