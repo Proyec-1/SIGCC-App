@@ -4,31 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGCC - Auditoría</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);padding:20px;}
+        .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
+        table{width:100%;border-collapse:collapse;margin-top:15px;}
+        th,td{padding:10px;text-align:left;border-bottom:1px solid #ddd;}
+        th{background:#0a4c8c;color:white;}
+        .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;}
+    </style>
 </head>
 <body>
     <div class="container">
-        <h2>📜 Registro de Auditoría</h2>
-        <button onclick="volver()" class="back-btn">← Volver</button>
-        
-        <div class="info">
-            <p>Registro de todas las acciones realizadas en el sistema</p>
-        </div>
+        <h2>📜 Auditoría</h2>
+        <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
         
         <div style="overflow-x:auto;">
             <table>
-                <thead>
-                    <tr><th>Fecha/Hora</th><th>Usuario</th><th>Nombre</th><th>Acción</th><th>Detalles</th></tr>
-                </thead>
-                <tbody id="listaAuditoria">
-                    <tr><td colspan="5">Cargando...</td></tr>
-                </tbody>
+                <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalles</th></tr></thead>
+                <tbody id="lista"></tbody>
             </table>
         </div>
     </div>
-    <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', cargarAuditoria);
+        const request = indexedDB.open('SIGCC_DB', 1);
+        request.onsuccess = (e) => {
+            const db = e.target.result;
+            const tx = db.transaction(['auditoria'], 'readonly');
+            const store = tx.objectStore('auditoria');
+            const getAll = store.getAll();
+            
+            getAll.onsuccess = () => {
+                const registros = getAll.result.reverse();
+                const tbody = document.getElementById('lista');
+                tbody.innerHTML = '';
+                
+                if (registros.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">No hay registros de auditoría</td></tr>';
+                    return;
+                }
+                
+                registros.forEach(r => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = new Date(r.fecha).toLocaleString();
+                    row.insertCell(1).innerHTML = r.usuario;
+                    row.insertCell(2).innerHTML = r.accion;
+                    row.insertCell(3).innerHTML = r.detalles || '';
+                });
+            };
+        };
     </script>
 </body>
 </html>
