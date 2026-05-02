@@ -4,36 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGCC - Nueva Cadena</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
+        .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
+        input,textarea,select{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:12px;}
+        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;width:100%;margin-top:10px;}
+        .back-btn{background:#666;width:auto;padding:8px 15px;}
+        label{font-weight:bold;margin-top:10px;display:block;}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h2>📄 Nueva Cadena de Custodia</h2>
-        <button onclick="volver()" class="back-btn">← Volver</button>
-        
+        <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
+
         <label>Descripción de la evidencia *:</label>
         <textarea id="descripcion" rows="3"></textarea>
-        
+
         <label>Lugar de hallazgo *:</label>
         <input type="text" id="lugar">
-        
+
         <label>Fecha y hora *:</label>
         <input type="datetime-local" id="fechaHora">
-        
-        <label>Delegación / Ubicación actual *:</label>
+
+        <label>Delegación:</label>
         <select id="delegacion">
-            <option value="CICPC San Carlos">CICPC San Carlos</option>
-            <option value="CICPC Tinaquillo">CICPC Tinaquillo</option>
-            <option value="TSJ Cojedes">TSJ Cojedes</option>
-            <option value="Ministerio Público San Carlos">Ministerio Público San Carlos</option>
-            <option value="UNES San Carlos">UNES San Carlos</option>
+            <option value="CICPC San Carlos (Cojedes)">San Carlos (Cojedes)</option>
+            <option value="CICPC Tinaquillo">Tinaquillo</option>
+            <option value="CICPC Caracas">Caracas - Sede Principal</option>
         </select>
-        
+
         <label>Observaciones:</label>
         <textarea id="observaciones" rows="2"></textarea>
-        
-        <button onclick="guardarCadena()">Guardar Cadena</button>
+
+        <button onclick="guardarCadena()">✅ Guardar Cadena</button>
+
+        <div id="qrContainer" style="display:none; margin-top:20px; text-align:center; padding:20px; background:#e8f5e9; border-radius:15px;">
+            <h3>✅ QR de la Cadena #<span id="qrId"></span></h3>
+            <div id="qrCode"></div>
+            <button onclick="window.location.href='dashboard.html'" class="back-btn">Volver</button>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        let db;
+        function initDB() {
+            const request = indexedDB.open('SIGCC_DB', 1);
+            request.onsuccess = (e) => { db = e.target.result; };
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('cadenas')) {
+                    db.createObjectStore('cadenas', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('auditoria')) {
+                    db.createObjectStore('auditoria', { keyPath: 'id', autoIncrement: true });
+                }
+            };
+        }
+        initDB();
+        
+        window.guardarCadena = function() {
+            const descripcion = document.getElementById('descripcion').value;
+            const lugar = document.getElementById('lugar').value;
+            const fechaHora = document.getElementById('fechaHora').value;
+            const delegacion = document.getElementById('delegacion').value;
+            const usuario = JSON.parse(localStorage.getItem('usuarioActual'));
+            
+            if (!descripcion || !lugar || !fechaHora) {
+                alert('Complete todos los campos');
+                return;
+            }
+            
+            const cadena = {
+                descripcion, lugar, fecha: fechaHora, delegacion,
+                creador: usuario.cedula,
+                creadorNombre: usuario.nombre,
+                fechaCreacion: new Date().toISOString()
+            };
+            
+            const tx = db.transaction(['cadenas'], 'readwrite');
+            const store = tx.objectStore('cadenas');
+            const req = store.add(cadena);
+            
+            req.onsuccess = (e) => {
+                const id = e.target.result;
+                document.querySelector('form').style.display = 'none';
+                document.getElementById('qrContainer').style.display = 'block';
+                document.getElementById('qrId').innerHTML = id;
+                new QRCode(document.getElementById('qrCode'), {
+                    text: JSON.stringify({ id: id }),
+                    width: 200,
+                    height: 200
+                });
+                
+                // Auditoría
+                const tx2 = db.transaction(['auditoria'], 'readwrite');
+                const store2 = tx2.objectStore('auditoria');
+                store2.add({
+                    fecha: new Date().toISOString(),
+                    usuario: usuario.cedula,
+                    accion: 'CREAR CADENA',
+                    detalles: `Cadena ${id} creada`
+                });
+                
+                alert('✅ Cadena #' + id + ' guardada');
+            };
+        };
+    </script>
 </body>
 </html>
