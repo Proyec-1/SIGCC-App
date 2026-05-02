@@ -3,24 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SIGCC CICPC</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="logo.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0a4c8c">
+    <title>SIGCC - Panel</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
         .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
         .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #eee;}
-        .header-left{display:flex;align-items:center;gap:10px;}
-        .logo-mini{width:35px;height:35px;}
         .card{background:#f8f9fa;padding:18px;margin:12px 0;border-radius:15px;cursor:pointer;text-align:center;border:1px solid #e0e0e0;transition:0.2s;}
         .card:hover{background:#e3f2fd;transform:translateY(-3px);}
         .card .icon{font-size:40px;}
         .badge{background:#0a4c8c;padding:4px 10px;border-radius:20px;color:white;font-size:11px;}
         .logout-btn{background:#666;width:auto;padding:8px 15px;border:none;border-radius:12px;color:white;cursor:pointer;}
-        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;}
         .status{margin-top:20px;padding-top:15px;border-top:1px solid #ddd;text-align:center;font-size:12px;}
         h2{font-size:1.2em;}
     </style>
@@ -28,10 +21,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-left">
-                <img src="logo_cicpc.svg" alt="CICPC" class="logo-mini" onerror="this.style.display='none'">
-                <h2>Bienvenido, <span id="nombreUsuario"></span></h2>
-            </div>
+            <h2>Bienvenido, <span id="nombreUsuario"></span></h2>
             <div>
                 <span id="rolBadge" class="badge">JEFE</span>
                 <button onclick="logout()" class="logout-btn">Cerrar</button>
@@ -47,7 +37,7 @@
             <div class="card" onclick="window.location.href='escaner.html'">
                 <div class="icon">📷</div>
                 <h3>Verificar Cadena</h3>
-                <p>Escanea QR o consulta por ID</p>
+                <p>Buscar por ID</p>
             </div>
             <div class="card" onclick="window.location.href='mis_cadenas.html'">
                 <div class="icon">📋</div>
@@ -70,10 +60,10 @@
         if (!user) window.location.href = 'index.html';
         document.getElementById('nombreUsuario').innerHTML = user.nombre;
         
-        window.logout = function() {
+        function logout() {
             localStorage.clear();
             window.location.href = 'index.html';
-        };
+        }
     </script>
 </body>
 </html>
