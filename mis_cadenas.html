@@ -2,27 +2,28 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>SIGCC - Mis Cadenas</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);padding:20px;}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
         .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
         table{width:100%;border-collapse:collapse;margin-top:15px;}
         th,td{padding:10px;text-align:left;border-bottom:1px solid #ddd;}
         th{background:#0a4c8c;color:white;}
         button{background:#0a4c8c;color:white;padding:5px 10px;border:none;border-radius:8px;cursor:pointer;}
         .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;}
+        h2{margin-bottom:15px;color:#0a4c8c;}
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📋 Mis Cadenas</h2>
+        <h2>📋 Mis Cadenas de Custodia</h2>
         <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
         
         <div style="overflow-x:auto;">
             <table id="tabla">
-                <thead><tr><th>ID</th><th>Descripción</th><th>Delegación</th><th>Fecha</th></tr></thead>
+                <thead><tr><th>ID</th><th>Descripción</th><th>Delegación</th><th>Fecha</th><th>Estado</th></tr></thead>
                 <tbody id="lista"></tbody>
             </table>
         </div>
@@ -45,16 +46,17 @@
                 tbody.innerHTML = '';
                 
                 if (misCadenas.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4">No hay cadenas registradas</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5">📭 No hay cadenas registradas</td></tr>';
                     return;
                 }
                 
-                misCadenas.forEach(c => {
+                misCadenas.reverse().forEach(c => {
                     const row = tbody.insertRow();
                     row.insertCell(0).innerHTML = c.id;
-                    row.insertCell(1).innerHTML = c.descripcion.substring(0, 30);
+                    row.insertCell(1).innerHTML = c.descripcion.substring(0, 35);
                     row.insertCell(2).innerHTML = c.delegacion;
                     row.insertCell(3).innerHTML = new Date(c.fechaCreacion).toLocaleDateString();
+                    row.insertCell(4).innerHTML = '🔵 ACTIVA';
                 });
             };
         };
