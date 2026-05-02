@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SIGCC - Registrar Funcionario</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
+        .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
+        input,select{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:12px;font-size:16px;}
+        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;width:100%;margin-top:10px;font-size:16px;font-weight:bold;}
+        .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;}
+        label{font-weight:bold;margin-top:10px;display:block;color:#333;}
+        h2{margin-bottom:15px;color:#0a4c8c;}
+        .info{background:#e3f2fd;padding:10px;border-radius:12px;margin-bottom:15px;font-size:12px;text-align:center;}
+        .success{background:#e8f5e9;padding:15px;border-radius:12px;margin-top:15px;display:none;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>👤 Registrar Nuevo Funcionario del CICPC</h2>
+        <button onclick="volver()" class="back-btn">← Volver</button>
+        
+        <div class="info">
+            🔐 Solo el Jefe del Sistema puede registrar nuevos funcionarios
+        </div>
+
+        <label>Cédula *:</label>
+        <input type="text" id="reg_cedula" placeholder="Ej: V12345678">
+
+        <label>Nombre completo *:</label>
+        <input type="text" id="reg_nombre" placeholder="Ej: Luis Rodríguez">
+
+        <label>Teléfono institucional:</label>
+        <input type="text" id="reg_telefono" placeholder="0412-1234567">
+
+        <label>Jerarquía (Rango):</label>
+        <select id="reg_jerarquia">
+            <option value="">-- Seleccione un rango --</option>
+            <option value="Detective">Detective</option>
+            <option value="Detective Asistente">Detective Asistente</option>
+            <option value="Detective Supervisor">Detective Supervisor</option>
+            <option value="Inspector">Inspector</option>
+            <option value="Inspector Adjunto">Inspector Adjunto</option>
+            <option value="Inspector Jefe">Inspector Jefe</option>
+            <option value="Comisario">Comisario</option>
+            <option value="Comisario Jefe">Comisario Jefe</option>
+            <option value="Comisario General">Comisario General</option>
+            <option value="Comisario General Superior">Comisario General Superior</option>
+            <option value="Comisario General Superior Nacional">Comisario General Superior Nacional</option>
+        </select>
+
+        <label>Rol en el sistema:</label>
+        <select id="reg_rol">
+            <option value="tecnico">🔬 Técnico en Criminalística</option>
+            <option value="resguardo">📦 Personal de Área de Resguardo</option>
+        </select>
+
+        <label>Contraseña *:</label>
+        <input type="password" id="reg_password" placeholder="Mínimo 6 caracteres">
+
+        <button onclick="registrarFuncionario()">✅ Registrar Funcionario</button>
+
+        <div id="mensajeSuccess" class="success"></div>
+    </div>
+
+    <script>
+        let db;
+        
+        function initDB() {
+            const request = indexedDB.open('SIGCC_DB', 1);
+            request.onsuccess = (e) => { db = e.target.result; };
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('usuarios')) {
+                    db.createObjectStore('usuarios', { keyPath: 'cedula' });
+                }
+            };
+        }
+        initDB();
+        
+        function volver() {
+            window.location.href = 'dashboard.html';
+        }
+        
+        // Función hash simple para contraseñas
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + 'SIGCC_SECURE_2025');
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return btoa(String.fromCharCode(...new Uint8Array(hash)));
+        }
+        
+        async function registrarFuncionario() {
+            const cedula = document.getElementById('reg_cedula').value.trim();
+            const nombre = document.getElementById('reg_nombre').value.trim();
+            const telefono = document.getElementById('reg_telefono').value.trim();
+            const jerarquia = document.getElementById('reg_jerarquia').value;
+            const rol = document.getElementById('reg_rol').value;
+            const password = document.getElementById('reg_password').value;
+            
+            if (!cedula || !nombre || !jerarquia || !password) {
+                alert('❌ Complete cédula, nombre, jerarquía y contraseña');
+                return;
+            }
+            
+            if (cedula.length < 8) {
+                alert('❌ Cédula inválida (Ej: V12345678)');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('❌ La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            const passwordHash = await hashPassword(password);
+            
+            const transaction = db.transaction(['usuarios'], 'readwrite');
+            const store = transaction.objectStore('usuarios');
+            
+            // Verificar si ya existe
+            const checkRequest = store.get(cedula);
+            checkRequest.onsuccess = (e) => {
+                if (e.target.result) {
+                    alert('❌ Ya existe un funcionario con esa cédula');
+                    return;
+                }
+                
+                // Guardar nuevo funcionario
+                store.put({
+                    cedula: cedula,
+                    nombre: nombre,
+                    password: passwordHash,
+                    telefono: telefono,
+                    jerarquia: jerarquia,
+                    rol: rol,
+                    estado: 'activo',
+                    fechaRegistro: new Date().toISOString()
+                });
+                
+                // Guardar en auditoría
+                const tx2 = db.transaction(['auditoria'], 'readwrite');
+                const store2 = tx2.objectStore('auditoria');
+                const usuarioActual = JSON.parse(localStorage.getItem('usuarioActual'));
+                store2.add({
+                    fecha: new Date().toISOString(),
+                    usuario: usuarioActual.cedula,
+                    usuarioNombre: usuarioActual.nombre,
+                    accion: 'REGISTRAR FUNCIONARIO',
+                    detalles: `Registró a ${nombre} (${jerarquia}) - Rol: ${rol}`
+                });
+                
+                const mensajeDiv = document.getElementById('mensajeSuccess');
+                mensajeDiv.innerHTML = `✅ Funcionario registrado exitosamente<br><br>
+                    <strong>Cédula:</strong> ${cedula}<br>
+                    <strong>Nombre:</strong> ${nombre}<br>
+                    <strong>Jerarquía:</strong> ${jerarquia}<br>
+                    <strong>Rol:</strong> ${rol === 'tecnico' ? '🔬 Técnico' : '📦 Resguardo'}<br><br>
+                    📌 Ya puede iniciar sesión con estas credenciales.`;
+                mensajeDiv.style.display = 'block';
+                
+                // Limpiar formulario
+                document.getElementById('reg_cedula').value = '';
+                document.getElementById('reg_nombre').value = '';
+                document.getElementById('reg_telefono').value = '';
+                document.getElementById('reg_password').value = '';
+                document.getElementById('reg_jerarquia').value = '';
+                document.getElementById('reg_rol').value = 'tecnico';
+                
+                setTimeout(() => {
+                    mensajeDiv.style.display = 'none';
+                }, 5000);
+            };
+        }
+        
+        window.volver = volver;
+        window.registrarFuncionario = registrarFuncionario;
+    </script>
+</body>
+</html>
