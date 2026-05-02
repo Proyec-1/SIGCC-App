@@ -2,32 +2,37 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGCC - Escáner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SIGCC - Verificar Cadena</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);padding:20px;}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
         .container{max-width:600px;margin:0 auto;background:white;border-radius:25px;padding:25px;}
-        input{width:100%;padding:12px;margin:10px 0;border:2px solid #ddd;border-radius:12px;}
-        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;width:100%;}
+        input{width:100%;padding:12px;margin:10px 0;border:2px solid #ddd;border-radius:12px;font-size:16px;}
+        button{background:#0a4c8c;color:white;padding:12px;border:none;border-radius:12px;cursor:pointer;width:100%;margin-top:10px;font-size:16px;font-weight:bold;}
         .back-btn{background:#666;width:auto;padding:8px 15px;margin-bottom:15px;}
         .resultado{background:#e8f5e9;padding:15px;border-radius:12px;margin-top:15px;}
+        .error-resultado{background:#ffebee;padding:15px;border-radius:12px;margin-top:15px;}
+        h2{margin-bottom:15px;color:#0a4c8c;}
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📷 Verificar Cadena</h2>
+        <h2>📷 Verificar Cadena de Custodia</h2>
         <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
 
-        <input type="number" id="buscarId" placeholder="Número de ID de la cadena">
-        <button onclick="verificar()">Verificar</button>
+        <input type="number" id="buscarId" placeholder="Ingrese el número de ID de la cadena">
+        <button onclick="verificar()">🔍 Verificar</button>
         <div id="resultado"></div>
     </div>
 
     <script>
         function verificar() {
             const id = parseInt(document.getElementById('buscarId').value);
-            if (!id) return alert('Ingrese un ID');
+            if (!id) {
+                alert('❌ Ingrese un ID válido');
+                return;
+            }
             
             const request = indexedDB.open('SIGCC_DB', 1);
             request.onsuccess = (e) => {
@@ -35,22 +40,29 @@
                 const tx = db.transaction(['cadenas'], 'readonly');
                 const store = tx.objectStore('cadenas');
                 const get = store.get(id);
+                const div = document.getElementById('resultado');
                 
                 get.onsuccess = () => {
                     const c = get.result;
-                    const div = document.getElementById('resultado');
                     if (c) {
                         div.innerHTML = `<div class="resultado">
-                            <h3>✅ CADENA VÁLIDA</h3>
+                            <h3>✅ CADENA DE CUSTODIA VÁLIDA</h3>
                             <p><strong>ID:</strong> ${c.id}</p>
                             <p><strong>Descripción:</strong> ${c.descripcion}</p>
-                            <p><strong>Lugar:</strong> ${c.lugar}</p>
+                            <p><strong>Lugar de hallazgo:</strong> ${c.lugar}</p>
                             <p><strong>Delegación:</strong> ${c.delegacion}</p>
-                            <p><strong>Fecha:</strong> ${c.fecha}</p>
+                            <p><strong>Fecha del hallazgo:</strong> ${c.fecha}</p>
+                            <p><strong>Observaciones:</strong> ${c.observaciones || 'Ninguna'}</p>
+                            <p><strong>Estado:</strong> 🔵 ACTIVA</p>
                             <p><strong>Creado por:</strong> ${c.creadorNombre}</p>
+                            <p><strong>Fecha de registro:</strong> ${new Date(c.fechaCreacion).toLocaleString()}</p>
                         </div>`;
                     } else {
-                        div.innerHTML = `<div class="resultado" style="background:#ffebee;">❌ Cadena #${id} no encontrada</div>`;
+                        div.innerHTML = `<div class="error-resultado">
+                            <h3>❌ CADENA NO ENCONTRADA</h3>
+                            <p>No existe ninguna cadena con ID #${id}</p>
+                            <p>Verifique el número e intente nuevamente.</p>
+                        </div>`;
                     }
                 };
             };
