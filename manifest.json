@@ -1,0 +1,27 @@
+{
+  "name": "SIGCC - Cadena de Custodia CICPC",
+  "short_name": "SIGCC",
+  "description": "Sistema Inteligente de Gestión de Cadena de Custodia para el CICPC",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0a4c8c",
+  "background_color": "#0a1929",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
