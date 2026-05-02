@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SIGCC - Verificar Cadena</title>
+    <title>SIGCC - Escáner QR</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a1929,#0c2d48);min-height:100vh;padding:20px;}
@@ -14,24 +15,137 @@
         .resultado{background:#e8f5e9;padding:15px;border-radius:12px;margin-top:15px;}
         .error-resultado{background:#ffebee;padding:15px;border-radius:12px;margin-top:15px;}
         h2{margin-bottom:15px;color:#0a4c8c;}
+        .modo-buttons{display:flex;gap:10px;margin:15px 0;}
+        .modo-btn{flex:1;background:#e0e0e0;color:#333;margin:0;}
+        .modo-btn.activo{background:#0a4c8c;color:white;}
+        .camara-box{background:#000;border-radius:15px;overflow:hidden;margin:10px 0;}
+        #reader{width:100%;}
+        .info{background:#e3f2fd;padding:10px;border-radius:12px;margin:10px 0;font-size:12px;text-align:center;}
     </style>
 </head>
 <body>
     <div class="container">
         <h2>📷 Verificar Cadena de Custodia</h2>
-        <button onclick="window.location.href='dashboard.html'" class="back-btn">← Volver</button>
+        <button onclick="volver()" class="back-btn">← Volver</button>
 
-        <input type="number" id="buscarId" placeholder="Ingrese el número de ID de la cadena">
-        <button onclick="verificar()">🔍 Verificar</button>
+        <div class="modo-buttons">
+            <button id="btnModoId" class="modo-btn activo" onclick="mostrarModo('id')">🔢 Buscar por ID</button>
+            <button id="btnModoCamara" class="modo-btn" onclick="mostrarModo('camara')">📷 Escanear QR</button>
+        </div>
+
+        <!-- MODO ID -->
+        <div id="modoId">
+            <input type="number" id="buscarId" placeholder="Ingrese el número de ID de la cadena">
+            <button onclick="verificarPorId()">🔍 Verificar</button>
+        </div>
+
+        <!-- MODO CÁMARA -->
+        <div id="modoCamara" style="display:none;">
+            <div class="info">
+                📌 Permite el acceso a la cámara cuando el navegador lo pida.<br>
+                Apunta al código QR de la evidencia.
+            </div>
+            <div id="reader" class="camara-box"></div>
+            <button id="btnDetener" style="background:#666; display:none;" onclick="detenerCamara()">⏹️ Detener Cámara</button>
+            <div id="lecturaResultado" style="margin-top:10px; text-align:center; font-weight:bold;"></div>
+        </div>
+
         <div id="resultado"></div>
     </div>
 
     <script>
-        function verificar() {
-            const id = parseInt(document.getElementById('buscarId').value);
+        let html5QrCode = null;
+        let escaneoActivo = false;
+        
+        function volver() {
+            detenerCamara();
+            window.location.href = 'dashboard.html';
+        }
+        
+        function mostrarModo(modo) {
+            const modoId = document.getElementById('modoId');
+            const modoCamara = document.getElementById('modoCamara');
+            const btnId = document.getElementById('btnModoId');
+            const btnCamara = document.getElementById('btnModoCamara');
+            
+            if (modo === 'id') {
+                modoId.style.display = 'block';
+                modoCamara.style.display = 'none';
+                btnId.classList.add('activo');
+                btnCamara.classList.remove('activo');
+                detenerCamara();
+            } else {
+                modoId.style.display = 'none';
+                modoCamara.style.display = 'block';
+                btnId.classList.remove('activo');
+                btnCamara.classList.add('activo');
+                iniciarCamara();
+            }
+        }
+        
+        async function iniciarCamara() {
+            if (escaneoActivo) return;
+            
+            try {
+                html5QrCode = new Html5Qrcode("reader");
+                escaneoActivo = true;
+                document.getElementById('btnDetener').style.display = 'block';
+                
+                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+                
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScanSuccess,
+                    onScanError
+                );
+            } catch (err) {
+                document.getElementById('lecturaResultado').innerHTML = '❌ No se pudo acceder a la cámara. Verifica los permisos.';
+                document.getElementById('lecturaResultado').style.color = 'red';
+                escaneoActivo = false;
+                document.getElementById('btnDetener').style.display = 'none';
+            }
+        }
+        
+        function onScanSuccess(decodedText) {
+            try {
+                const datos = JSON.parse(decodedText);
+                if (datos.id) {
+                    detenerCamara();
+                    verificarPorId(datos.id);
+                } else {
+                    document.getElementById('lecturaResultado').innerHTML = '⚠️ QR no válido para SIGCC';
+                    setTimeout(() => { document.getElementById('lecturaResultado').innerHTML = ''; }, 2000);
+                }
+            } catch(e) {
+                document.getElementById('lecturaResultado').innerHTML = '⚠️ QR no reconocido por el sistema';
+                setTimeout(() => { document.getElementById('lecturaResultado').innerHTML = ''; }, 2000);
+            }
+        }
+        
+        function onScanError(error) {
+            // Solo para depuración, no mostrar errores al usuario
+        }
+        
+        function detenerCamara() {
+            if (html5QrCode && escaneoActivo) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    escaneoActivo = false;
+                    document.getElementById('btnDetener').style.display = 'none';
+                    document.getElementById('lecturaResultado').innerHTML = '';
+                }).catch(() => {});
+            }
+        }
+        
+        function verificarPorId(idRecibido = null) {
+            let id = idRecibido;
             if (!id) {
-                alert('❌ Ingrese un ID válido');
-                return;
+                id = parseInt(document.getElementById('buscarId').value);
+                if (!id) {
+                    alert('❌ Ingrese un ID válido');
+                    return;
+                }
             }
             
             const request = indexedDB.open('SIGCC_DB', 1);
@@ -61,12 +175,21 @@
                         div.innerHTML = `<div class="error-resultado">
                             <h3>❌ CADENA NO ENCONTRADA</h3>
                             <p>No existe ninguna cadena con ID #${id}</p>
-                            <p>Verifique el número e intente nuevamente.</p>
                         </div>`;
+                    }
+                    
+                    // Limpiar input si viene de escáner
+                    if (idRecibido) {
+                        document.getElementById('buscarId').value = '';
                     }
                 };
             };
         }
+        
+        window.verificarPorId = verificarPorId;
+        window.mostrarModo = mostrarModo;
+        window.volver = volver;
+        window.detenerCamara = detenerCamara;
     </script>
 </body>
 </html>
